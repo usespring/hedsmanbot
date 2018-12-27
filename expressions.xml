@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<expressions>
+    <expressionAndAdminChatId>
+        <entry>
+            <key>.*fuck.*</key>
+            <value>139338807</value>
+        </entry>
+        <entry>
+            <key>.*http.*</key>
+            <value>139338807</value>
+        </entry>
+        <entry>
+            <key>^fuck</key>
+            <value>139338807</value>
+        </entry>
+        <entry>
+            <key>aaa</key>
+            <value>139338807</value>
+        </entry>
+    </expressionAndAdminChatId>
+</expressions>
