@@ -265,7 +265,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        // Return bot username
+        // Return bot username without @
         return "Headsman bot id";
     }
 
