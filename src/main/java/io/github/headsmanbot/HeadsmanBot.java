@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /*
@@ -110,9 +108,8 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         for (Map.Entry<String, Long> expressionAndAdminChatId : expressionAndAdminChatIds.entrySet()) {
             String expression = expressionAndAdminChatId.getKey();
             try {
-                Pattern r = Pattern.compile(expression);
-                Matcher m = r.matcher(messageText);
-                boolean isMatched = m.matches();
+
+                boolean isMatched = messageText.contains(expression);
                 if (isMatched) {
                     return expressionAndAdminChatId;
                 }
@@ -230,12 +227,12 @@ public class HeadsmanBot extends TelegramLongPollingBot {
                 replyText = "Expressions has not to be empty! Try again";
             }
         } else if (messageText.equals("/start")) {
-            replyText = "Hi!\nI am here to remove annoying messages by getting a java regular expression.\n" +
-                    "You can reply a java regular expression here by starting from 'e:'. For example:\n" +
-                    "e:.*http.* -The message will be removed if contains a web link";
+            replyText = "Hi admin!\nI will search your expression in every incoming message to find annoying message.\n" +
+                    "You can send your expression by starting from 'e:'. For example:\n" +
+                    "e:http -Every messages that contain a web link, will be removed.";
         } else {
-            replyText = "Error! You have to send a java regular expression with prefix 'e:'. For example:\n" +
-                    "e:.*http.* -The message will be removed if contains a web link";
+            replyText = "Error! You have to send a expression with prefix 'e:'. For example:\n" +
+                    "e:http -Every messages that contain a web link, will be removed.";
         }
         return replyText;
     }
@@ -270,10 +267,11 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         return "Headsman_bot";
     }
 
-    //// TODO: 12/27/2018 move token to secured place
     @Override
     public String getBotToken() {
         // Return bot token from BotFather
-        return "";
+        Map<String, String> getenv = System.getenv();
+        String toke = getenv.get("bot.token");
+        return toke;
     }
 }
