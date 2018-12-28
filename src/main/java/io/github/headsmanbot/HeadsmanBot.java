@@ -39,55 +39,56 @@ public class HeadsmanBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             Chat chat = message.getChat();
             Long chatId = message.getChatId();
-            Boolean hasMessage = update.hasMessage();
+            Boolean hasMessage = update.hasMessage(); //status 1 -a message has been sent
+            Boolean hasNewChatMember = message.getNewChatMembers() != null; //status 2 -a user has been added
+            Boolean messageHasText = message.hasText();
+            Boolean messageHasCaption = message.getCaption() != null;
             if (hasMessage) {
-                Boolean messageHasText = message.hasText();
-                if (messageHasText) {
-                    Boolean isPrivateChat = chat.isUserChat();
-                    Boolean isChannelChat = chat.isChannelChat();
-                    Boolean isSuperGroupChat = chat.isSuperGroupChat();
-                    Boolean isGroupChat = chat.isGroupChat();
-                    String messageUsername = message.getFrom().getUserName();
-                    int messageId = message.getMessageId();
-                    String messageText = message.getText();
-
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append("The message received with chatId:");
-                    stringBuilder.append(chatId);
-                    stringBuilder.append(" and text:");
-                    stringBuilder.append(messageText);
-                    logger.info(stringBuilder.toString());
-
-                    if (isPrivateChat) {
+                Boolean isPrivateChat = chat.isUserChat(); //status 1.1
+                Boolean isSuperGroupChat = chat.isSuperGroupChat(); //status 1.2
+                Boolean isGroupChat = chat.isGroupChat(); //status 1.2 also
+                Boolean isChannelChat = chat.isChannelChat(); //status 1.3
+                if (isPrivateChat) {
+                    String privateReplyText = "";
+                    if (messageHasText) {
+                        String messageUsername = message.getFrom().getUserName();
+                        String messageText = message.getText();
                         if (hasPermissionForUser(messageUsername)) {
-                            handleUserCommand(messageText, chatId);
+                            privateReplyText = handleUserCommand(messageText, chatId);
                         } else {
-                            String replyText = "Access denied!";
-                            sendMessage(chatId, replyText);
-                            logger.error(replyText);
+                            privateReplyText = "Access denied!";
                         }
-                    } else if (isSuperGroupChat || isGroupChat) {
-                        if (hasPermissionGroup(chatId)) {
-                            checkAndDeleteAnnoyingMessage(messageText, chatId, messageId, messageUsername);
-                        } else {
-                            String replyText = "The bot needs a permission";
-                            logger.error(replyText);
-                            sendMessage(chatId, replyText);
+                    } else {
+                        privateReplyText = "Please send a command like /start";
+                    }
+                    sendMessage(chatId, privateReplyText);
+                } else if (isSuperGroupChat || isGroupChat) {
+                    if (hasPermissionGroup(chatId)) {
+                        String messageUsername = message.getFrom().getUserName();
+                        int messageId = message.getMessageId();
+                        String textOrCaption = "";
+                        if (messageHasText) {
+                            textOrCaption = message.getText();
+                        } else if (messageHasCaption) {
+                            textOrCaption = message.getCaption();
                         }
-                    } else if (isChannelChat) {
-                        //// TODO: 12/27/2018 write handler for channels
+                        handleAnnoyingMessage(textOrCaption, chatId, messageId, messageUsername);
+                    } else {
+                        //Please notice:The bot works only in permitted group
                     }
-                }// end messageHasText
-                else {
-                    //else, a user has been added ,so he must be checked
-                    List<Integer> botsUserId = hasNewBotMember(message.getNewChatMembers());
-                    for (Integer botId : botsUserId) {
-                        kickChatMember(chatId, botId);
-                    }
+                } else if (isChannelChat) {
+                    //// TODO: 12/27/2018 write handler for channels
+                }
+            } else if (hasNewChatMember) {
+                List<Integer> botsUserId = hasNewBotMember(message.getNewChatMembers());
+                for (Integer botId : botsUserId) {
+                    kickChatMember(chatId, botId);
                 }
             }
         } catch (TelegramApiException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 
@@ -122,7 +123,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         return null;
     }
 
-    private void checkAndDeleteAnnoyingMessage(String messageText, Long chatId, int messageId, String messageUsername) throws TelegramApiException {
+    private void handleAnnoyingMessage(String messageText, Long chatId, int messageId, String messageUsername) throws TelegramApiException {
         Map.Entry<String, Long> expressionAndAdminChatId = hasMatchExpression(messageText);
         Long ownerExpressionChatId = expressionAndAdminChatId.getValue();
         String expression = expressionAndAdminChatId.getKey();
@@ -215,9 +216,9 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     //// TODO: 12/27/2018 improve bot commands to be clearer and more user friendly
     //// TODO: 12/27/2018 make the replyText's text clearer
     //// TODO: 12/27/2018 add more commands like /help, /stop, /listExpressions , or etc
-    private void handleUserCommand(String messageText, Long chatId) throws TelegramApiException {
+    private String handleUserCommand(String messageText, Long chatId) throws TelegramApiException {
         String replyText = "";
-        if (messageText.startsWith("e:")) {
+        if (messageText.startsWith("e:")) {// expression start with 'e:'
             String expressionText = messageText.replaceAll("e:", "");
             if (!expressionText.isEmpty()) {
                 Expressions expressions = loadExpressionsFromXml();
@@ -236,7 +237,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
             replyText = "Error! You have to send a java regular expression with prefix 'e:'. For example:\n" +
                     "e:.*http.* -The message will be removed if contains a web link";
         }
-        sendMessage(chatId, replyText);
+        return replyText;
     }
 
     //// TODO: 12/27/2018 add a response handler
@@ -266,13 +267,13 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         // Return bot username without @
-        return "Headsman bot id";
+        return "Headsman_bot";
     }
 
     //// TODO: 12/27/2018 move token to secured place
     @Override
     public String getBotToken() {
         // Return bot token from BotFather
-        return "Headsman bot token";
+        return "710629994:AAHLDhFDECl94V_mJ5WT81dZbM2w82D7bzE";
     }
 }
