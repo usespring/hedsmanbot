@@ -274,6 +274,6 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         // Return bot token from BotFather
-        return "710629994:AAHLDhFDECl94V_mJ5WT81dZbM2w82D7bzE";
+        return "";
     }
 }
