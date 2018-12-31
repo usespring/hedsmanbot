@@ -34,6 +34,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     //all telegram updates that relevant to the bot is received in this method
     public void onUpdateReceived(Update update) {
         try {
+            logger.debug(update.toString());
             Message message = update.getMessage();
             Chat chat = message.getChat();
             Long chatId = message.getChatId();
@@ -41,7 +42,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
             Boolean hasNewChatMember = message.getNewChatMembers() != null; //status 2 -a user has been added
             Boolean messageHasText = message.hasText();
             Boolean messageHasCaption = message.getCaption() != null;
-            if (hasMessage) {
+            if (messageHasText) {
                 Boolean isPrivateChat = chat.isUserChat(); //status 1.1
                 Boolean isSuperGroupChat = chat.isSuperGroupChat(); //status 1.2
                 Boolean isGroupChat = chat.isGroupChat(); //status 1.2 also
@@ -49,9 +50,9 @@ public class HeadsmanBot extends TelegramLongPollingBot {
                 if (isPrivateChat) {
                     String privateReplyText = "";
                     if (messageHasText) {
-                        String messageUsername = message.getFrom().getUserName();
+                        Integer userChatId = message.getFrom().getId();
                         String messageText = message.getText();
-                        if (hasPermissionForUser(messageUsername)) {
+                        if (hasPermission(userChatId)) {
                             privateReplyText = handleUserCommand(messageText, chatId);
                         } else {
                             privateReplyText = "Access denied!";
@@ -72,15 +73,16 @@ public class HeadsmanBot extends TelegramLongPollingBot {
                         }
                         handleAnnoyingMessage(textOrCaption, chatId, messageId, messageUsername);
                     } else {
-                        //Please notice:The bot works only in permitted group
+                        //Please notice:The bot works only a registered group
                     }
                 } else if (isChannelChat) {
                     //// TODO: 12/27/2018 write handler for channels
                 }
             } else if (hasNewChatMember) {
-                List<Integer> botsUserId = hasNewBotMember(message.getNewChatMembers());
-                for (Integer botId : botsUserId) {
-                    kickChatMember(chatId, botId);
+                //kick all new bots
+                List<User> bots = findAllBots(message.getNewChatMembers());
+                for (User bot : bots) {
+                    kickChatMember(chatId,bot);
                 }
             }
         } catch (TelegramApiException e) {
@@ -91,14 +93,14 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 the method's return type must be change better
-    private List<Integer> hasNewBotMember(List<User> newChatMembers) {
-        List<Integer> botsUserId = new ArrayList<>();
+    private List<User> findAllBots(List<User> newChatMembers) {
+        List<User> bots = new ArrayList<>();
         for (User newChatMember : newChatMembers) {
             if (newChatMember.getBot()) {
-                botsUserId.add(newChatMember.getId());
+                bots.add(newChatMember);
             }
         }
-        return botsUserId;
+        return bots;
     }
 
     //// TODO: 12/27/2018 the method's return type must be change better
@@ -137,7 +139,8 @@ public class HeadsmanBot extends TelegramLongPollingBot {
             stringBuilder.append(" :\n <b>");
             stringBuilder.append(messageText);
             stringBuilder.append("</b>");
-            sendMessage(ownerExpressionChatId, stringBuilder.toString());
+            //// TODO: 12/31/2018 send message in admins channel
+//            sendMessage(ownerExpressionChatId, stringBuilder.toString());
 
             StringBuilder stringBuilderLog = new StringBuilder();
             stringBuilderLog.append("Delete a message with id:");
@@ -151,12 +154,18 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 all of the admins' group must be allowed to command automatically
-    private boolean hasPermissionForUser(String messageUsername) {
-        if (messageUsername.equals("abbasghahreman") || messageUsername.equals("khosro_1989")) {
-            return true;
-        } else {
-            return false;
-        }
+    private Boolean hasPermission(Integer userChatId) {
+        List<Long> groupIds = findAllGroupIdsByAdminChatId(userChatId);
+        Boolean userIsAdmin=groupIds.size()>0;
+        return userIsAdmin;
+    }
+
+    //// TODO: 12/30/2018 Define a repository to save and load group and users information
+    private List<Long> findAllGroupIdsByAdminChatId(Integer adminChatId) {
+        List<Long> groupIds = new ArrayList<>();
+        // for example: my test group id
+        groupIds.add(-1001213671004L);
+        return groupIds;
     }
 
     //// TODO: 12/27/2018 add an application's interface form to register new group and save them to a repository
@@ -248,10 +257,16 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 add a response handler
-    private void kickChatMember(Long chatId, int botId) throws TelegramApiException {
+    private void kickChatMember(Long chatId, User bot) throws TelegramApiException {
+       int botId=bot.getId();
+        String botUsername=bot.getUserName();
+        String botFullName=bot.getFirstName()+bot.getLastName();
         KickChatMember kickChatMemberRequest = new KickChatMember(chatId, botId);
         execute(kickChatMemberRequest);
         logger.info("kickChatMember executed");
+        //// TODO: 12/31/2018 send message in admins channel
+//        sendMessage();
+
     }
 
     //// TODO: 12/27/2018 add a response handler
@@ -272,6 +287,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         // Return bot token from BotFather
         Map<String, String> getenv = System.getenv();
         String toke = getenv.get("bot.token");
-        return toke;
+        logger.debug(toke);
+        return toke="710629994:AAHLDhFDECl94V_mJ5WT81dZbM2w82D7bzE";
     }
 }
