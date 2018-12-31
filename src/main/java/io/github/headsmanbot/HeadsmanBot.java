@@ -38,8 +38,9 @@ public class HeadsmanBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             Chat chat = message.getChat();
             Long chatId = message.getChatId();
-            Boolean messageHasText = message.hasText(); //status 1 -a message has been sent
+            Boolean hasMessage = update.hasMessage(); //status 1 -a message has been sent
             Boolean hasNewChatMember = message.getNewChatMembers() != null; //status 2 -a user has been added
+            Boolean messageHasText = message.hasText();
             Boolean messageHasCaption = message.getCaption() != null;
             if (messageHasText) {
                 Boolean isPrivateChat = chat.isUserChat(); //status 1.1
@@ -287,6 +288,6 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         Map<String, String> getenv = System.getenv();
         String toke = getenv.get("bot.token");
         logger.debug(toke);
-        return toke;
+        return toke="710629994:AAHLDhFDECl94V_mJ5WT81dZbM2w82D7bzE";
     }
 }
