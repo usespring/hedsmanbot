@@ -16,7 +16,6 @@ import javax.xml.bind.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
@@ -39,8 +38,9 @@ public class HeadsmanBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             Chat chat = message.getChat();
             Long chatId = message.getChatId();
-            Boolean messageHasText = message.hasText(); //status 1 -a message has been sent
+            Boolean hasMessage = update.hasMessage(); //status 1 -a message has been sent
             Boolean hasNewChatMember = message.getNewChatMembers() != null; //status 2 -a user has been added
+            Boolean messageHasText = message.hasText();
             Boolean messageHasCaption = message.getCaption() != null;
             if (messageHasText) {
                 Boolean isPrivateChat = chat.isUserChat(); //status 1.1
@@ -122,34 +122,33 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         return null;
     }
 
-    private void handleAnnoyingMessage(String messageText, Long groupId, int messageId, String messageUsername) throws TelegramApiException {
+    private void handleAnnoyingMessage(String messageText, Long chatId, int messageId, String messageUsername) throws TelegramApiException {
         Map.Entry<String, Long> expressionAndAdminChatId = hasMatchExpression(messageText);
         Long ownerExpressionChatId = expressionAndAdminChatId.getValue();
         String expression = expressionAndAdminChatId.getKey();
         if (ownerExpressionChatId != 0L) {
 
             //step1. delete annoying message
-            deleteMessage(groupId, messageId);
+            deleteMessage(chatId, messageId);
             //step2. send a message to info owner expression
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("The following message has removed with your expression <b>");
+            stringBuilder.append("Hi admin. The following message has removed with your expression <b>");
             stringBuilder.append(expression);
             stringBuilder.append("</b> sent by @");
             stringBuilder.append(messageUsername);
             stringBuilder.append(" :\n <b>");
             stringBuilder.append(messageText);
             stringBuilder.append("</b>");
-            //// send message into admins channel
-            Long channelId= getChannelIdBygroupId(groupId);
-            sendMessage(channelId, stringBuilder.toString());
+            //// TODO: 12/31/2018 send message in admins channel
+//            sendMessage(ownerExpressionChatId, stringBuilder.toString());
 
             StringBuilder stringBuilderLog = new StringBuilder();
             stringBuilderLog.append("Delete a message with id:");
             stringBuilderLog.append(messageId);
             stringBuilderLog.append(" and text:");
             stringBuilderLog.append(messageText);
-            stringBuilderLog.append(" in the groupId:");
-            stringBuilderLog.append(groupId);
+            stringBuilderLog.append(" in the chatId:");
+            stringBuilderLog.append(chatId);
             logger.info(stringBuilderLog.toString());
         }
     }
@@ -258,32 +257,18 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 add a response handler
-    private void kickChatMember(Long groupId, User bot) throws TelegramApiException {
+    private void kickChatMember(Long chatId, User bot) throws TelegramApiException {
        int botId=bot.getId();
         String botUsername=bot.getUserName();
-        String botName=bot.getFirstName();
-        KickChatMember kickChatMemberRequest = new KickChatMember(groupId, botId);
+        String botFullName=bot.getFirstName()+bot.getLastName();
+        KickChatMember kickChatMemberRequest = new KickChatMember(chatId, botId);
         execute(kickChatMemberRequest);
         logger.info("kickChatMember executed");
-        //// send message to admins channel
-        Long channelId= getChannelIdBygroupId(groupId);
-        StringBuilder sb=new StringBuilder();
-        sb.append("A new bot with id @");
-        sb.append(botUsername);
-        sb.append(" and name <b>");
-        sb.append(botName);
-        sb.append("</b> has kicked at ");
-        sb.append(new Date().toString());
-        sendMessage(channelId, sb.toString());
-        logger.info(sb.toString());
+        //// TODO: 12/31/2018 send message in admins channel
+//        sendMessage();
+
     }
-    
-    private Long getChannelIdBygroupId(Long goupId)
-    {
-        //// todo get channel id from repository 
-        return -1001414298630L;
-    }
-    
+
     //// TODO: 12/27/2018 add a response handler
     private void deleteMessage(Long chatId, int messageId) throws TelegramApiException {
         DeleteMessage deleteMessage = new DeleteMessage(chatId, messageId);
@@ -303,6 +288,6 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         Map<String, String> getenv = System.getenv();
         String toke = getenv.get("bot.token");
         logger.debug(toke);
-        return toke;
+        return toke="710629994:AAHLDhFDECl94V_mJ5WT81dZbM2w82D7bzE";
     }
 }
