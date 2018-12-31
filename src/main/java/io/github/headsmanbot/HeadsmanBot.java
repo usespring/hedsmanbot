@@ -16,6 +16,7 @@ import javax.xml.bind.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
@@ -121,33 +122,34 @@ public class HeadsmanBot extends TelegramLongPollingBot {
         return null;
     }
 
-    private void handleAnnoyingMessage(String messageText, Long chatId, int messageId, String messageUsername) throws TelegramApiException {
+    private void handleAnnoyingMessage(String messageText, Long groupId, int messageId, String messageUsername) throws TelegramApiException {
         Map.Entry<String, Long> expressionAndAdminChatId = hasMatchExpression(messageText);
         Long ownerExpressionChatId = expressionAndAdminChatId.getValue();
         String expression = expressionAndAdminChatId.getKey();
         if (ownerExpressionChatId != 0L) {
 
             //step1. delete annoying message
-            deleteMessage(chatId, messageId);
+            deleteMessage(groupId, messageId);
             //step2. send a message to info owner expression
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Hi admin. The following message has removed with your expression <b>");
+            stringBuilder.append("The following message has removed with your expression <b>");
             stringBuilder.append(expression);
             stringBuilder.append("</b> sent by @");
             stringBuilder.append(messageUsername);
             stringBuilder.append(" :\n <b>");
             stringBuilder.append(messageText);
             stringBuilder.append("</b>");
-            //// TODO: 12/31/2018 send message in admins channel
-//            sendMessage(ownerExpressionChatId, stringBuilder.toString());
+            //// send message into admins channel
+            Long channelId= getChannelIdBygroupId(groupId);
+            sendMessage(channelId, stringBuilder.toString());
 
             StringBuilder stringBuilderLog = new StringBuilder();
             stringBuilderLog.append("Delete a message with id:");
             stringBuilderLog.append(messageId);
             stringBuilderLog.append(" and text:");
             stringBuilderLog.append(messageText);
-            stringBuilderLog.append(" in the chatId:");
-            stringBuilderLog.append(chatId);
+            stringBuilderLog.append(" in the groupId:");
+            stringBuilderLog.append(groupId);
             logger.info(stringBuilderLog.toString());
         }
     }
@@ -256,18 +258,32 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 add a response handler
-    private void kickChatMember(Long chatId, User bot) throws TelegramApiException {
+    private void kickChatMember(Long groupId, User bot) throws TelegramApiException {
        int botId=bot.getId();
         String botUsername=bot.getUserName();
-        String botFullName=bot.getFirstName()+bot.getLastName();
-        KickChatMember kickChatMemberRequest = new KickChatMember(chatId, botId);
+        String botName=bot.getFirstName();
+        KickChatMember kickChatMemberRequest = new KickChatMember(groupId, botId);
         execute(kickChatMemberRequest);
         logger.info("kickChatMember executed");
-        //// TODO: 12/31/2018 send message in admins channel
-//        sendMessage();
-
+        //// send message to admins channel
+        Long channelId= getChannelIdBygroupId(groupId);
+        StringBuilder sb=new StringBuilder();
+        sb.append("A new bot with id @");
+        sb.append(botUsername);
+        sb.append(" and name <b>");
+        sb.append(botName);
+        sb.append("</b> has kicked at ");
+        sb.append(new Date().toString());
+        sendMessage(channelId, sb.toString());
+        logger.info(sb.toString());
     }
-
+    
+    private Long getChannelIdBygroupId(Long goupId)
+    {
+        //// todo get channel id from repository 
+        return -1001414298630L;
+    }
+    
     //// TODO: 12/27/2018 add a response handler
     private void deleteMessage(Long chatId, int messageId) throws TelegramApiException {
         DeleteMessage deleteMessage = new DeleteMessage(chatId, messageId);
