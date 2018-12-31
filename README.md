@@ -1,4 +1,4 @@
-# io.github.hedsmanbot
+# hedsmanbot
 A project run to recognize and remove annoying bots and messages in a telegram group.
 
 ### Before you start, You have to follow these instructions:
