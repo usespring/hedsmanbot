@@ -3,9 +3,10 @@ A java project run to recognize and remove annoying bots and messages in telegra
 
 ### Before you start:
 ### You have to have thoso ids:
-1. Your supergroup chatId, To obtain it, First, you have to add your bot as an admin member to your soupergroup. After sending first message,you can by tying https://api.telegram.org/bot[your bot token]/getUpdates, find group chat id in the json reponse.
-2. Ids of those admins that you want to access to the bot command. For this, You want an admin to send a message to your bot PM and then you can find his id by trying https://api.telegram.org/bot[your bot token]/getUpdates.
-3. Ids of the channel that contains all your soupergroup admins, your bot will send to the channel all her activities include what messages he has deleted and what bots he has kicked.
+1. Your supergroup chatId, To obtain it, First, you have to add your bot as an admin member to your soupergroup. After sending first message, call api https://api.telegram.org/bot[your bot token]/getUpdates, after that, find group chat id in the json reponse.
+2. Ids of those admins that you want to access to the bot command. For this, You want an admin to send a message to your bot PM and then you can find its id by calling api https://api.telegram.org/bot[your bot token]/getUpdates.
+3. Ids of the channel that all of you soupergroup admins can join it. Your bot will send logs to the channel. The logs would be about what messages it has deleted and what bots it has kicked.To achive your chnnel id, you have to follow these instructions:
+  - First, Create a *public* channel with desired username, after, like above cases, call api https://api.telegram.org/bot[your bot token]/getUpdates to obtain the id, then, copy the id of channel, and finaly,change channel type to *private*.
   
 ### And set those ids at:
 1. Set an id of your soupergroups at the `TelegramLongPollingBot.existGroup()` ,also at `TelegramLongPollingBot.findAllGroupIdsByAdminChatId()`.
@@ -22,5 +23,7 @@ A java project run to recognize and remove annoying bots and messages in telegra
 - You can start work on the bot command by sending `/start` at the bot's PM. 
 - The bot receives you expressions and save them into the expression.xml file. 
 - After kicking a bot member or deleting an annoying message, bot would send a log message into admins channels.
+
+* Call api like this: https://api.telegram.org/bot710629994:AAHLDhFDEC784V_mJ5WT81dZb42w82D7b45/getUpdates
 
 **Please feel free to contact me at telegram [@abbasghahreman](https://web.telegram.org/#/im?p=@abbasghahreman)**
