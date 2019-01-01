@@ -13,9 +13,9 @@ A java project run to recognize and remove annoying bots and messages in telegra
 3. Set your channels id at `TelegramLongPollingBot.getChannelIdBygroupId()`.
 
 ### About using application resources:
-4. The application has not any api or a user interface like home.html, you can only see the application's status by tracing log file or seeing every respone to every command. 
+4. The application has not any api or a user interface like *home.html*, so you can only see the application's status by tracing log file or seeing every respone to every command. 
 5. Set the allow write permission on the *expression.xml* file located in root directory.
-6. Set enviroment variable with name `bot.token` and value `your bot token`. 
+6. For keeping my token private, I set an Environment variable with name `bot.token` and value `my bot token`.
 7. Clone or download from the **develop branch**
 
 ### How dose the bot work:
