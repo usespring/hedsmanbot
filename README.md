@@ -3,9 +3,9 @@ A java project run to recognize and remove annoying bots and messages in telegra
 
 ### Before you start:
 ### You have to have thoso ids:
-1. Your supergroup chatId, To obtain it, First, you have to add your bot as an admin member to your soupergroup. After sending first message, call api https://api.telegram.org/bot[your bot token]/getUpdates, after that, find group chat id in the json reponse.
-2. Ids of those admins that you want to access to the bot command. For this, You want an admin to send a message to your bot PM and then you can find its id by calling api https://api.telegram.org/bot[your bot token]/getUpdates.
-3. Ids of the channel that all of you soupergroup admins can join it. Your bot will send logs to the channel. The logs would be about what messages it has deleted and what bots it has kicked.To achive your chnnel id, you have to follow these instructions, First, Create a *public* channel with desired username, after, like above cases, call api https://api.telegram.org/bot[your bot token]/getUpdates to obtain the id, then, copy the id of channel, and finaly,change channel type to *private*.
+1. Your supergroup chatId, To obtain it, First, you have to add your bot as an admin member to your soupergroup. After sending first message, call api [https://api.telegram.org/bot[your bot token]/getUpdates](http://), after that, find group chat id in the json reponse.
+2. Ids of those admins that you want to access to the bot command. For this, You want an admin to send a message to your bot PM and then you can find its id by calling api [https://api.telegram.org/bot[your bot token]/getUpdates](http://).
+3. Ids of the channel that all of you soupergroup admins can join it. Your bot will send logs to the channel. The logs would be about what messages it has deleted and what bots it has kicked.To achive your chnnel id, you have to follow these instructions, First, Create a *public* channel with desired username, after, like above cases, call api [https://api.telegram.org/bot[your bot token]/getUpdates](http://) to obtain the id, then, copy the id of channel, and finaly,change channel type to *private*.
   
 ### And set those ids at:
 1. Set an id of your soupergroups at the `TelegramLongPollingBot.existGroup()` ,also at `TelegramLongPollingBot.findAllGroupIdsByAdminChatId()`.
