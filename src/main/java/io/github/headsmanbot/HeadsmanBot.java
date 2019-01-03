@@ -52,7 +52,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
                     if (messageHasText) {
                         Integer userChatId = message.getFrom().getId();
                         String messageText = message.getText();
-                        if (hasPermission(userChatId)) {
+                        if (isAsAdmin(userChatId)) {
                             privateReplyText = handleUserCommand(messageText, chatId);
                         } else {
                             privateReplyText = "Access denied!";
@@ -62,7 +62,7 @@ public class HeadsmanBot extends TelegramLongPollingBot {
                     }
                     sendMessage(chatId, privateReplyText);
                 } else if (isSuperGroupChat || isGroupChat) {
-                    if (hasPermissionGroup(chatId)) {
+                    if (existGroup(chatId)) {
                         String messageUsername = message.getFrom().getUserName();
                         int messageId = message.getMessageId();
                         String textOrCaption = "";
@@ -155,10 +155,16 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 all of the admins' group must be allowed to command automatically
-    private Boolean hasPermission(Integer userChatId) {
-        List<Long> groupIds = findAllGroupIdsByAdminChatId(userChatId);
-        Boolean userIsAdmin=groupIds.size()>0;
-        return userIsAdmin;
+    private Boolean isAsAdmin(Integer userChatId) {
+        
+        if(userChatId==139338807)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     //// TODO: 12/30/2018 Define a repository to save and load group and users information
@@ -170,8 +176,9 @@ public class HeadsmanBot extends TelegramLongPollingBot {
     }
 
     //// TODO: 12/27/2018 add an application's interface form to register new group and save them to a repository
-    private boolean hasPermissionGroup(Long chatId) {
-        if (chatId == -1001140328233L || chatId == -1001213671004L) {
+    private boolean existGroup(Long chatId) {
+        //todo fetch from proper repository
+        if (chatId == -1001213671004L) {
             return true;
         }
         return false;
